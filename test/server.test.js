@@ -165,7 +165,7 @@ describe('Notes API resource', function() {
           return Note.findById(res.body.id);
         })
         .then((note) => {
-          expect(res.body).to.deep.equal(note);
+          compareDBtoApi(note, res);
         });
     }); 
   });
