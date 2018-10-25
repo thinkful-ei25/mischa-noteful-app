@@ -157,11 +157,9 @@ describe('Notes API resource', function() {
           expect(res).to.have.status(201);
           expect(res).to.be.json;
           expect(res.body).to.be.a('object');
-          console.log(res.body);
           expect(res.body).to.include.keys(noteKeys);
           expect(res.body.id).to.not.be.null;
           for(let key in newNote){
-            console.log(key);
             expect(res.body[key]).to.equal(newNote[key]);
           }
           return Note.findById(res.body.id);
