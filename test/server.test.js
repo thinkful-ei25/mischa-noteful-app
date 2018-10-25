@@ -99,7 +99,7 @@ describe('Notes API resource', function() {
   after(function() {
     return mongoose.disconnect();
   });
-  const apiRoute = '/api/notes';
+  
   const noteKeys = ['content', 'createdAt', 'id','title','updatedAt'];
   describe('GET /  all notes', function() {
     let res;
