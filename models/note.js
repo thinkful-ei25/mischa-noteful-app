@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 
+
 const noteSchema = new mongoose.Schema({
   title: {type: String, required: false},
-  content: {type: String}
+  content: {type: String},
+  folderId: {type: mongoose.Schema.Types.ObjectId, ref: 'Folder'}
 });
 
 // Add `createdAt` and `updatedAt` fields
@@ -15,5 +17,7 @@ noteSchema.set('toJSON', {
     delete ret.__v;
   }
 });
+
+
 
 module.exports = mongoose.model('Note', noteSchema);
