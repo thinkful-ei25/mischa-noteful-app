@@ -83,7 +83,7 @@ router.put('/:id', (req, res, next) => {
   Folder
     .findByIdAndUpdate(req.params.id, updateObj, {new :true})
     .then((result) => {
-      res.status(202).json(result);
+      res.status(201).json(result);
     })
     .catch(err => {
       if(err.code === 11000) {

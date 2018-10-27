@@ -4,7 +4,7 @@ const router = express.Router();
 
 const Tag = require('../models/tag');
 
-const Note = require('../models/note')
+const Note = require('../models/note');
 
 const mongoose = require('mongoose');
 
@@ -78,7 +78,7 @@ router.put('/:id', (req, res, next) => {
   Tag
     .findByIdAndUpdate(req.params.id, updateTag, {new :true})
     .then((result) => {
-      res.status(202).json(result);
+      res.status(201).json(result);
     })
     .catch(err => {
       if(err.code === 11000) {

@@ -6,11 +6,22 @@ const router = express.Router();
 
 const Note = require('../models/note');
 
+const Folder = require('../models/folder');
+console.log('Folder is:' + Folder);
 const Tag = require('../models/tag');
-
+console.log('Tag is:' + Tag);
 const mongoose = require('mongoose');
 
-
+function checkIfDocumentInCollection(Collection, documents, nameOfDocument){
+  return Collection.find({ _id: { $in: documents } })
+    .then((result) => {
+      if(result.length !== documents.length){
+        const err = new Error (`${nameOfDocument} doesn't exist`);
+        err.status = 404;
+        return err;
+      }
+    });
+}
 
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
@@ -76,7 +87,7 @@ router.post('/', (req, res, next) => {
   let {title, content, folderId, tags} = req.body;
   if(!tags){
     tags = [];
-  };
+  }
   //validate user input
   if(!title){
     const err = new Error('title is required!');
@@ -90,9 +101,9 @@ router.post('/', (req, res, next) => {
       err.status = (400);
       return next(err);
     }
+    // console.log('folder check: ', checkIfDocumentInCollection(Folder, folderId));
   }
   if(tags){ 
-
     tags.forEach((tag) => {
       if (!mongoose.Types.ObjectId.isValid(tag)){
         const err = new Error ('Please input valid tag id');
@@ -100,30 +111,37 @@ router.post('/', (req, res, next) => {
         return next(err);
       }
     });
-   
   }
-  Tag.find({ _id: { $in: tags } })
-    .then((result) => {
-      console.log(result);
-      if(result.length !== tags.length){
-        const err = new Error ('tag doesn\'t exist');
-        err.status = (400);
-        return err;
-      }
-    })
+  // const newNote = {title, content, folderId, tags};
+  // Note
+  //   .create(newNote)
+  //   .then((result) => {
+  //     res.location(`api/notes/${result.id}`).status(201).json(result);
+  //   })
+  //   .catch(err => {
+  //     next(err);
+  //   });
+  checkIfDocumentInCollection(Tag, tags, 'tag')
     .then((err) => {
       if(err){
         return next(err);
       }
-      const newNote = {title, content, folderId, tags};
-      Note
-        .create(newNote)
-        .then((result) => {
-          res.location(`api/notes/${result.id}`).status(201).json(result);
-        })
-        .catch(err => {
-          next(err);
+      checkIfDocumentInCollection(Folder, folderId, 'folder')
+        .then((err) => {
+          if(err){
+            return next(err);
+          }
+          const newNote = {title, content, folderId, tags};
+          Note
+            .create(newNote)
+            .then((result) => {
+              res.location(`api/notes/${result.id}`).status(201).json(result);
+            })
+            .catch(err => {
+              next(err);
+            });
         });
+      
     }); 
 });
 
@@ -145,16 +163,7 @@ router.put('/:id', (req, res, next) => {
     delete updateNote.folderId;
     updateNote.$unset = {folderId : 1};
   }
-  //findbyid(id){
-  //note => note.title = updateNote.title
-  // for(key in note){
-  // if updatenote[key]
-  // }
-  //note.save()
-  //}//
-  // if(!title){
 
-  // }
   Note
     .findByIdAndUpdate(id, updateNote, {new: true})  
     .then((result) =>  {

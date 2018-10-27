@@ -100,7 +100,7 @@ describe('Notes API resource', function() {
           res = _res;
           expect(res.body).to.have.lengthOf.at.least(1);
           expect(res).to.have.status(200);
-          res.body.forEach((note) => expect(note).to.have.keys('content', 'createdAt', 'id','title','updatedAt', 'folderId'));
+          res.body.forEach((note) => expect(note).to.have.keys('content', 'createdAt', 'id','title','updatedAt', 'folderId', 'tags'));
           return Note.countDocuments();
         })
         .then((count) => {
@@ -144,7 +144,7 @@ describe('Notes API resource', function() {
           res = _res;
           expect(res).to.have.status(200);
           expect(res.body).to.be.a('object');
-          expect(res.body).to.have.keys('content', 'createdAt', 'id','title','updatedAt', 'folderId');
+          expect(res.body).to.have.keys('content', 'createdAt', 'id','title','updatedAt', 'folderId','tags');
           return Note.findById(id);
         })
         .then((note) => {
