@@ -18,7 +18,7 @@ function checkIfDocumentInCollection(Collection, documents, nameOfDocument){
       if(result.length !== documents.length){
         const err = new Error (`${nameOfDocument} doesn't exist`);
         err.status = 404;
-        return err;
+        Promise.reject(err);
       }
     });
 }
@@ -121,28 +121,43 @@ router.post('/', (req, res, next) => {
   //   .catch(err => {
   //     next(err);
   //   });
-  checkIfDocumentInCollection(Tag, tags, 'tag')
-    .then((err) => {
-      if(err){
-        return next(err);
-      }
-      checkIfDocumentInCollection(Folder, folderId, 'folder')
-        .then((err) => {
-          if(err){
-            return next(err);
-          }
-          const newNote = {title, content, folderId, tags};
-          Note
-            .create(newNote)
-            .then((result) => {
-              res.location(`api/notes/${result.id}`).status(201).json(result);
-            })
-            .catch(err => {
-              next(err);
-            });
-        });
+
+
+  Promise.all([
+    checkIfDocumentInCollection(Tag, tags, 'tags'),
+    checkIfDocumentInCollection(Folder, folderId, 'folders')
+  ])
+    .then(() => {
+      const newNote = {title, content, folderId, tags};
+      return Note.create(newNote);
+    })
+    .then((result) => {
+      res.location(`api/notes/${result.id}`).status(201).json(result);
+    })
+    .catch(err => next(err));
+
+  // checkIfDocumentInCollection(Tag, tags, 'tag')
+  //   .then((err) => {
+  //     if(err){
+  //       return next(err);
+  //     }
+  //     checkIfDocumentInCollection(Folder, folderId, 'folder')
+  //       .then((err) => {
+  //         if(err){
+  //           return next(err);
+  //         }
+  //         const newNote = {title, content, folderId, tags};
+  //         Note
+  //           .create(newNote)
+  //           .then((result) => {
+  //             res.location(`api/notes/${result.id}`).status(201).json(result);
+  //           })
+  //           .catch(err => {
+  //             next(err);
+  //           });
+  //       });
       
-    }); 
+  //   }); 
 });
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
@@ -164,12 +179,24 @@ router.put('/:id', (req, res, next) => {
     updateNote.$unset = {folderId : 1};
   }
 
-  Note
-    .findByIdAndUpdate(id, updateNote, {new: true})  
-    .then((result) =>  {
-      res.location(`api/notes/${result.id}`).status(202).json(result);
+  Promise.all([
+    checkIfDocumentInCollection(Tag, tags, 'tags'),
+    checkIfDocumentInCollection(Folder, folderId, 'folder')
+  ])
+    .then(() => {
+      Note
+      .findByIdAndUpdate(id, updateNote, {new: true})  
+      .then((result) =>  {
+        res.location(`api/notes/${result.id}`).status(202).json(result);
+      })
+      .catch(err => next(err));
     })
-    .catch(err => next(err));
+  // Note
+  //   .findByIdAndUpdate(id, updateNote, {new: true})  
+  //   .then((result) =>  {
+  //     res.location(`api/notes/${result.id}`).status(202).json(result);
+  //   })
+  //   .catch(err => next(err));
   
 
 });
